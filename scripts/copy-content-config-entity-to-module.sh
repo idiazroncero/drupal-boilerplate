@@ -21,6 +21,8 @@ ENTITY_TYPE=$1
 BUNDLE=$2
 MODULE=$3
 
+source ./scripts/copy-config-to-module.sh
+
 function show_help {
 cat << EOF
  Copy a content config entity, its fields, view modes and form display into a existing module.
@@ -66,15 +68,7 @@ MODULE_DIR=$(find . -name $MODULE.info.yml | xargs dirname)
 MODULE_DIR="$MODULE_DIR/config/install"
 mkdir -p $MODULE_DIR
 
-# function to copy the config entities and remove the filename
-function copy_config {
-  cp config/default/$1 $MODULE_DIR
-  sed -i /^uuid:/d $MODULE_DIR/$1
-  sed -i /^_core:/d $MODULE_DIR/$1
-  sed -i /^\ \ default_config_hash:/d $MODULE_DIR/$1
-}
-
-copy_config $ENTITY.yml
+copy_config $ENTITY.yml $MODULE_DIR
 
 # Get entities naming the current entity.
 DEPENDANT_ENTITIES=( $(grep $ENTITY config/default/* \
@@ -86,13 +80,13 @@ DEPENDANT_ENTITIES=( $(grep $ENTITY config/default/* \
 for CONFIG in "${DEPENDANT_ENTITIES[@]}"
 do
 
-  copy_config $CONFIG
+  copy_config $CONFIG $MODULE_DIR
 
   if [[ $CONFIG == field\.field\.* ]]
   then
     FIELD_NAME=$(echo $CONFIG | cut -d. -f5)
     FIELD_CONFIG_STORAGE="field.storage.$FIELD_PREFIX.$FIELD_NAME.yml"
 
-    copy_config $FIELD_CONFIG_STORAGE
+    copy_config $FIELD_CONFIG_STORAGE $MODULE_DIR
   fi
 done
