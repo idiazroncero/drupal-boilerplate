@@ -37,3 +37,5 @@ parameters:
         - js
         - test
       standard: Drupal,DrupalPractice
+      ignore_patterns:
+        - ./web/themes/custom/clima/assets/js
